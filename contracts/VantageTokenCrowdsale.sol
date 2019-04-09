@@ -24,7 +24,7 @@ contract VantageTokenCrowdsale is Crowdsale, MintedCrowdsale, CappedCrowdsale, T
   CrowdsaleStage public stage = CrowdsaleStage.PreICO;
 
   // Token Distribution
-  uint256 public tokenSalePercentage   = 70;
+  uint256 public tokenSalePercentage   = 60;
   uint256 public foundersPercentage    = 10;
   uint256 public foundationPercentage  = 20;
   uint256 public partnersPercentage    = 10;

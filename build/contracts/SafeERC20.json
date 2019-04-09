@@ -1,13 +1,12 @@
 {
   "contractName": "SafeERC20",
   "abi": [],
-  "metadata": "{\"compiler\":{\"version\":\"0.4.24+commit.e67f0147\"},\"language\":\"Solidity\",\"output\":{\"abi\":[],\"devdoc\":{\"methods\":{},\"title\":\"SafeERC20\"},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol\":\"SafeERC20\"},\"evmVersion\":\"byzantium\",\"libraries\":{},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"openzeppelin-solidity/contracts/token/ERC20/ERC20.sol\":{\"keccak256\":\"0xd48f887d15d0411901fc331e74a25d7afa63d89a1257e8e3f43ce1b1e8f4a1e3\",\"urls\":[\"bzzr://09c28b5e4b9323a3675abe0d2f53d78ee30b96f20add8b9432f870df3c8e1970\"]},\"openzeppelin-solidity/contracts/token/ERC20/ERC20Basic.sol\":{\"keccak256\":\"0xa36ddb4cd5f04f0f5b7f344819267dd5500467d58949dd012a85876233c9314e\",\"urls\":[\"bzzr://02ed45f8a66dde083a6fae1b27a4f37605c81e3b8a26b7b16dab9537f901535c\"]},\"openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol\":{\"keccak256\":\"0xfbe6cfafde7eb6265c5168accc1e31b19b828ebe653439a68b6976aa52d73e31\",\"urls\":[\"bzzr://54b2e961fce33675e49b72ab4309350e6e0d8b2772d85732175e48a74d86050d\"]}},\"version\":1}",
   "bytecode": "0x604c602c600b82828239805160001a60731460008114601c57601e565bfe5b5030600052607381538281f30073000000000000000000000000000000000000000030146080604052600080fd00a165627a7a72305820a6a4492664dd0ba71846c731f807b34ce41efe313e762aac172dba88845c811e0029",
   "deployedBytecode": "0x73000000000000000000000000000000000000000030146080604052600080fd00a165627a7a72305820a6a4492664dd0ba71846c731f807b34ce41efe313e762aac172dba88845c811e0029",
   "sourceMap": "346:447:20:-;;132:2:-1;166:7;155:9;146:7;137:37;252:7;246:14;243:1;238:23;232:4;229:33;270:1;265:20;;;;222:63;;265:20;274:9;222:63;;298:9;295:1;288:20;328:4;319:7;311:22;352:7;343;336:24",
   "deployedSourceMap": "346:447:20:-;;;;;;;;",
   "source": "pragma solidity ^0.4.23;\n\nimport \"./ERC20Basic.sol\";\nimport \"./ERC20.sol\";\n\n\n/**\n * @title SafeERC20\n * @dev Wrappers around ERC20 operations that throw on failure.\n * To use this library you can add a `using SafeERC20 for ERC20;` statement to your contract,\n * which allows you to call the safe operations as `token.safeTransfer(...)`, etc.\n */\nlibrary SafeERC20 {\n  function safeTransfer(ERC20Basic token, address to, uint256 value) internal {\n    require(token.transfer(to, value));\n  }\n\n  function safeTransferFrom(\n    ERC20 token,\n    address from,\n    address to,\n    uint256 value\n  )\n    internal\n  {\n    require(token.transferFrom(from, to, value));\n  }\n\n  function safeApprove(ERC20 token, address spender, uint256 value) internal {\n    require(token.approve(spender, value));\n  }\n}\n",
-  "sourcePath": "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol",
+  "sourcePath": "openzeppelin-solidity\\contracts\\token\\ERC20\\SafeERC20.sol",
   "ast": {
     "absolutePath": "openzeppelin-solidity/contracts/token/ERC20/SafeERC20.sol",
     "exportedSymbols": {
@@ -1677,8 +1676,8 @@
     "version": "0.4.24+commit.e67f0147.Emscripten.clang"
   },
   "networks": {},
-  "schemaVersion": "3.0.6",
-  "updatedAt": "2019-04-08T13:11:42.950Z",
+  "schemaVersion": "3.0.2",
+  "updatedAt": "2019-04-08T18:50:43.691Z",
   "devdoc": {
     "methods": {},
     "title": "SafeERC20"

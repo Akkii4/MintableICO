@@ -231,7 +231,6 @@
       "type": "function"
     }
   ],
-  "metadata": "",
   "bytecode": "0x",
   "deployedBytecode": "0x",
   "sourceMap": "",
@@ -2591,8 +2590,8 @@
     "version": "0.4.24+commit.e67f0147.Emscripten.clang"
   },
   "networks": {},
-  "schemaVersion": "3.0.6",
-  "updatedAt": "2019-04-08T13:11:42.941Z",
+  "schemaVersion": "3.0.2",
+  "updatedAt": "2019-04-08T18:50:43.703Z",
   "devdoc": {
     "methods": {
       "addManyToWhitelist(address[])": {

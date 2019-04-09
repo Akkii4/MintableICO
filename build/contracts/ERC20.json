@@ -175,13 +175,12 @@
       "type": "function"
     }
   ],
-  "metadata": "",
   "bytecode": "0x",
   "deployedBytecode": "0x",
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "pragma solidity ^0.4.23;\n\nimport \"./ERC20Basic.sol\";\n\n\n/**\n * @title ERC20 interface\n * @dev see https://github.com/ethereum/EIPs/issues/20\n */\ncontract ERC20 is ERC20Basic {\n  function allowance(address owner, address spender)\n    public view returns (uint256);\n\n  function transferFrom(address from, address to, uint256 value)\n    public returns (bool);\n\n  function approve(address spender, uint256 value) public returns (bool);\n  event Approval(\n    address indexed owner,\n    address indexed spender,\n    uint256 value\n  );\n}\n",
-  "sourcePath": "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol",
+  "sourcePath": "openzeppelin-solidity\\contracts\\token\\ERC20\\ERC20.sol",
   "ast": {
     "absolutePath": "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol",
     "exportedSymbols": {
@@ -1233,8 +1232,8 @@
     "version": "0.4.24+commit.e67f0147.Emscripten.clang"
   },
   "networks": {},
-  "schemaVersion": "3.0.6",
-  "updatedAt": "2019-04-08T13:11:42.945Z",
+  "schemaVersion": "3.0.2",
+  "updatedAt": "2019-04-08T18:50:43.674Z",
   "devdoc": {
     "methods": {},
     "title": "ERC20 interface"

@@ -1,7 +1,46 @@
-import ether from './helpers/ether';
-import EVMRevert from './helpers/EVMRevert';
-import { increaseTimeTo, duration } from './helpers/increaseTime';
-import latestTime from './helpers/latestTime';
+
+
+function latestTime () {
+  return web3.eth.getBlock("latest").timestamp;
+}
+function increaseTime (duration) {
+  const id = Date.now();
+
+  return new Promise((resolve, reject) => {
+    web3.currentProvider.send({
+      jsonrpc: '2.0',
+      method: 'evm_increaseTime',
+      params: [duration],
+      id: id,
+    }, err1 => {
+      if (err1) return reject(err1);
+
+      web3.currentProvider.send({
+        jsonrpc: '2.0',
+        method: 'evm_mine',
+        id: id + 1,
+      }, (err2, res) => {
+        return err2 ? reject(err2) : resolve(res);
+      });
+    });
+  });
+}
+
+ function increaseTimeTo (target) {
+  let now = latestTime();
+  if (target < now) throw Error(`Cannot increase current time(${now}) to a moment in the past(${target})`);
+  let diff = target - now;
+  return increaseTime(diff);
+}
+
+ const duration = {
+  seconds: function (val) { return val; },
+  minutes: function (val) { return val * this.seconds(60); },
+  hours: function (val) { return val * this.minutes(60); },
+  days: function (val) { return val * this.hours(24); },
+  weeks: function (val) { return val * this.days(7); },
+  years: function (val) { return val * this.days(365); },
+};
 
 const BigNumber = web3.BigNumber;
 
@@ -19,7 +58,7 @@ contract('VantageTokenCrowdsale', function([_, wallet, investor1, investor2, fou
 
   before(async function() {
     // Transfer extra ether to investor1's account for testing
-    await web3.eth.sendTransaction({ from: _, to: investor1, value: ether(25) })
+    await web3.eth.sendTransaction({ from: _, to: investor1, value: web3.utils.toWei('0.1', 'ether') })
   });
 
   beforeEach(async function () {
@@ -38,18 +77,18 @@ contract('VantageTokenCrowdsale', function([_, wallet, investor1, investor2, fou
     // Crowdsale config
     this.rate = 500;
     this.wallet = wallet;
-    this.cap = ether(100);
-    this.openingTime = latestTime() + duration.weeks(1);
+    this.cap = web3.utils.toWei('100', 'ether');
+    this.openingTime = (new Date).getTime() + duration.weeks(1);
     this.closingTime = this.openingTime + duration.weeks(1);
-    this.goal = ether(50);
+    this.goal = web3.utils.toWei('50', 'ether');
     this.foundersFund = foundersFund;
     this.foundationFund = foundationFund;
     this.partnersFund = partnersFund;
     this.releaseTime  = this.closingTime + duration.years(1);
 
     // Investor caps
-    this.investorMinCap = ether(0.002);
-    this.inestorHardCap = ether(50);
+    this.investorMinCap = web3.utils.toWei('0.002', 'ether');
+    this.inestorHardCap = web3.utils.toWei('50', 'ether');
 
     // ICO Stages
     this.preIcoStage = 0;
@@ -114,7 +153,7 @@ contract('VantageTokenCrowdsale', function([_, wallet, investor1, investor2, fou
   describe('minted crowdsale', function() {
     it('mints tokens after purchase', async function() {
       const originalTotalSupply = await this.token.totalSupply();
-      await this.crowdsale.sendTransaction({ value: ether(1), from: investor1 });
+      await this.crowdsale.sendTransaction({ value: web3.utils.toWei('1', 'ether'), from: investor1 });
       const newTotalSupply = await this.token.totalSupply();
       assert.isTrue(newTotalSupply > originalTotalSupply);
     });
@@ -137,37 +176,37 @@ contract('VantageTokenCrowdsale', function([_, wallet, investor1, investor2, fou
   describe('whitelisted crowdsale', function() {
     it('rejects contributions from non-whitelisted investors', async function() {
       const notWhitelisted = _;
-      await this.crowdsale.buyTokens(notWhitelisted, { value: ether(1), from: notWhitelisted }).should.be.rejectedWith(EVMRevert);
+      await this.crowdsale.buyTokens(notWhitelisted, { value: web3.utils.toWei('1', 'ether'), from: notWhitelisted }).should.be.rejectedWith('revert');
     });
   });
 
   describe('refundable crowdsale', function() {
     beforeEach(async function() {
-      await this.crowdsale.buyTokens(investor1, { value: ether(1), from: investor1 });
+      await this.crowdsale.buyTokens(investor1, { value: web3.utils.toWei('1', 'ether'), from: investor1 });
     });
 
     describe('during crowdsale', function() {
       it('prevents the investor from claiming refund', async function() {
-        await this.vault.refund(investor1, { from: investor1 }).should.be.rejectedWith(EVMRevert);
+        await this.vault.refund(investor1, { from: investor1 }).should.be.rejectedWith('revert');
       });
     });
 
     describe('when the corwdsale stage is PreICO', function() {
       beforeEach(async function () {
         // Crowdsale stage is already PreICO by default
-        await this.crowdsale.buyTokens(investor1, { value: ether(1), from: investor1 });
+        await this.crowdsale.buyTokens(investor1, { value: web3.utils.toWei('1', 'ether'), from: investor1 });
       });
 
       it('forwards funds to the wallet', async function () {
         const balance = await web3.eth.getBalance(this.wallet);
-        expect(balance.toNumber()).to.be.above(ether(100));
+        expect(balance.toNumber()).to.be.above(web3.utils.toWei('100', 'ether'));
       });
     });
 
     describe('when the crowdsale stage is ICO', function() {
       beforeEach(async function () {
         await this.crowdsale.setCrowdsaleStage(this.icoStage, { from: _ });
-        await this.crowdsale.buyTokens(investor1, { value: ether(1), from: investor1 });
+        await this.crowdsale.buyTokens(investor1, { value: web3.utils.toWei('1', 'ether'), from: investor1 });
       });
 
       it('forwards funds to the refund vault', async function () {
@@ -198,13 +237,13 @@ contract('VantageTokenCrowdsale', function([_, wallet, investor1, investor2, fou
     });
 
     it('prevents non-admin from updating the stage', async function () {
-      await this.crowdsale.setCrowdsaleStage(this.icoStage, { from: investor1 }).should.be.rejectedWith(EVMRevert);
+      await this.crowdsale.setCrowdsaleStage(this.icoStage, { from: investor1 }).should.be.rejectedWith('revert');
     });
   });
 
   describe('accepting payments', function() {
     it('should accept payments', async function() {
-      const value = ether(1);
+      const value = web3.utils.toWei('1', 'ether');
       const purchaser = investor2;
       await this.crowdsale.sendTransaction({ value: value, from: investor1 }).should.be.fulfilled;
       await this.crowdsale.buyTokens(investor1, { value: value, from: purchaser }).should.be.fulfilled;
@@ -215,14 +254,14 @@ contract('VantageTokenCrowdsale', function([_, wallet, investor1, investor2, fou
     describe('when the contribution is less than the minimum cap', function() {
       it('rejects the transaction', async function() {
         const value = this.investorMinCap - 1;
-        await this.crowdsale.buyTokens(investor2, { value: value, from: investor2 }).should.be.rejectedWith(EVMRevert);
+        await this.crowdsale.buyTokens(investor2, { value: value, from: investor2 }).should.be.rejectedWith('revert');
       });
     });
 
     describe('when the investor has already met the minimum cap', function() {
       it('allows the investor to contribute below the minimum cap', async function() {
         // First contribution is valid
-        const value1 = ether(1);
+        const value1 = web3.utils.toWei('1', 'ether');
         await this.crowdsale.buyTokens(investor1, { value: value1, from: investor1 });
         // Second contribution is less than investor cap
         const value2 = 1; // wei
@@ -234,16 +273,16 @@ contract('VantageTokenCrowdsale', function([_, wallet, investor1, investor2, fou
   describe('when the total contributions exceed the investor hard cap', function () {
     it('rejects the transaction', async function () {
       // First contribution is in valid range
-      const value1 = ether(2);
+      const value1 = web3.utils.toWei('2', 'ether');
       await this.crowdsale.buyTokens(investor1, { value: value1, from: investor1 });
       // Second contribution sends total contributions over investor hard cap
-      const value2 = ether(49);
-      await this.crowdsale.buyTokens(investor1, { value: value2, from: investor1 }).should.be.rejectedWith(EVMRevert);
+      const value2 = web3.utils.toWei('49', 'ether');
+      await this.crowdsale.buyTokens(investor1, { value: value2, from: investor1 }).should.be.rejectedWith('revert');
     });
   });
 
   describe('when the contribution is within the valid range', function () {
-    const value = ether(2);
+    const value = web3.utils.toWei('2', 'ether');
     it('succeeds & updates the contribution amount', async function () {
       await this.crowdsale.buyTokens(investor2, { value: value, from: investor2 }).should.be.fulfilled;
       const contribution = await this.crowdsale.getUserContribution(investor2);
@@ -254,9 +293,9 @@ contract('VantageTokenCrowdsale', function([_, wallet, investor1, investor2, fou
   describe('token transfers', function () {
     it('does not allow investors to transfer tokens during crowdsale', async function () {
       // Buy some tokens first
-      await this.crowdsale.buyTokens(investor1, { value: ether(1), from: investor1 });
+      await this.crowdsale.buyTokens(investor1, { value: web3.utils.toWei('1', 'ether'), from: investor1 });
       // Attempt to transfer tokens during crowdsale
-      await this.token.transfer(investor2, 1, { from: investor1 }).should.be.rejectedWith(EVMRevert);
+      await this.token.transfer(investor2, 1, { from: investor1 }).should.be.rejectedWith('revert');
     });
   });
 
@@ -264,7 +303,7 @@ contract('VantageTokenCrowdsale', function([_, wallet, investor1, investor2, fou
     describe('when the goal is not reached', function() {
       beforeEach(async function () {
         // Do not meet the toal
-        await this.crowdsale.buyTokens(investor2, { value: ether(1), from: investor2 });
+        await this.crowdsale.buyTokens(investor2, { value: web3.utils.toWei('1', 'ether'), from: investor2 });
         // Fastforward past end time
         await increaseTimeTo(this.closingTime + 1);
         // Finalize the crowdsale
@@ -282,8 +321,8 @@ contract('VantageTokenCrowdsale', function([_, wallet, investor1, investor2, fou
         this.walletBalance = await web3.eth.getBalance(wallet);
 
         // Meet the goal
-        await this.crowdsale.buyTokens(investor1, { value: ether(26), from: investor1 });
-        await this.crowdsale.buyTokens(investor2, { value: ether(26), from: investor2 });
+        await this.crowdsale.buyTokens(investor1, { value: web3.utils.toWei('26', 'ether'), from: investor1 });
+        await this.crowdsale.buyTokens(investor2, { value: web3.utils.toWei('26', 'ether'), from: investor2 });
         // Fastforward past end time
         await increaseTimeTo(this.closingTime + 1);
         // Finalize the crowdsale
@@ -347,13 +386,13 @@ contract('VantageTokenCrowdsale', function([_, wallet, investor1, investor2, fou
 
         // Can't withdraw from timelocks
         const foundersTimelock = await TokenTimelock.at(foundersTimelockAddress);
-        await foundersTimelock.release().should.be.rejectedWith(EVMRevert);
+        await foundersTimelock.release().should.be.rejectedWith('revert');
 
         const foundationTimelock = await TokenTimelock.at(foundationTimelockAddress);
-        await foundationTimelock.release().should.be.rejectedWith(EVMRevert);
+        await foundationTimelock.release().should.be.rejectedWith('revert');
 
         const partnersTimelock = await TokenTimelock.at(partnersTimelockAddress);
-        await partnersTimelock.release().should.be.rejectedWith(EVMRevert);
+        await partnersTimelock.release().should.be.rejectedWith('revert');
 
         // Can withdraw from timelocks
         await increaseTimeTo(this.releaseTime + 1);
@@ -390,7 +429,7 @@ contract('VantageTokenCrowdsale', function([_, wallet, investor1, investor2, fou
         owner.should.equal(this.wallet);
 
         // Prevents investor from claiming refund
-        await this.vault.refund(investor1, { from: investor1 }).should.be.rejectedWith(EVMRevert);
+        await this.vault.refund(investor1, { from: investor1 }).should.be.rejectedWith('revert');
       });
 
     });
